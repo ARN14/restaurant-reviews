@@ -1,5 +1,4 @@
 const express = require('express');
-const request = require('supertest');
 const {getStatus, getRestaurants, postRestaurant, deleteRestaurant, patchRestaurant, getRestByAreaId} = require('./controller')
 
 const app = express();
