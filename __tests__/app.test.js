@@ -15,21 +15,21 @@ afterAll(() => {
 });
 
 
-describe('GET/api', () => {
+describe('GET api', () => {
     test('return 200 status code', () => {
         return request(app).get('/api').expect(200)
     });
 
 
-    test('should return an object containing a message key and "all ok" value', () => {
+    test('should return an object containing a message to the user', () => {
         return request(app).get('/api').expect(200).then((response) => {
-            expect(response.body).toEqual({ message: 'all ok' })
+            expect(response.body).toEqual({ message: 'Hello and welcome to the restaurant reviews API! Feel free to browse restaurants, add or delete, or post reviews.' })
         })
     });
 });
 
 
-describe('GET/api/restaurants', () => {
+describe('GET api/restaurants', () => {
     test('return 200 status code', () => {
         return request(app).get('/api/restaurants').expect(200)
     });
@@ -42,6 +42,13 @@ describe('GET/api/restaurants', () => {
             expect(Array.isArray(response.body.restaurants)).toBe(true);
         })
     });
+
+
+    test("restaurants contain a key of average_rating", () => {
+        return request(app).get("/api/restaurants").then((response) => {
+            expect(response.body.restaurants[0].hasOwnProperty("average_rating")).toBe(true);
+        })
+    })
 });
 
 
@@ -123,29 +130,33 @@ describe('PATCH /api/restaurants/:restaurant_id', () => {
                         })
                 });
         })
+
+
         test("should return status code 400 when given an invalid id", () => {
             return request(app).patch("/api/restaurants/cheese").send({ area_id: 2 }).expect(400)
-            .then((response) => {
-                expect(response.body).toEqual(
-                    {
-                        msg: "Invalid restaurant ID"
-                    })
-            })
+                .then((response) => {
+                    expect(response.body).toEqual(
+                        {
+                            msg: "Invalid restaurant ID"
+                        })
+                })
         })
+
+
         test("should return status code 404 when id is not found", () => {
             return request(app).patch("/api/restaurants/100").send({ area_id: 2 }).expect(404)
-            .then((response) => {
-                expect(response.body).toEqual(
-                    {
-                        msg: "restaurant ID not found"
-                    })
-            })
+                .then((response) => {
+                    expect(response.body).toEqual(
+                        {
+                            msg: "restaurant ID not found"
+                        })
+                })
         })
     })
 });
 
 
-describe("GET /api/areas/:area_id/restaurants", () => {
+describe("GET api/areas/:area_id/restaurants", () => {
     test("should return 200 status code", () => {
         return request(app).get('/api/areas/1/restaurants').expect(200);
     })
@@ -175,10 +186,40 @@ describe("GET /api/areas/:area_id/restaurants", () => {
 })
 
 
-describe('GET/api/restaurants with average_rating', () => {
-    test("restaurants contain a key of average_rating", () => {
-        return request(app).get("/api/restaurants").then((response) => {
-            expect(response.body.restaurants[0].hasOwnProperty("average_rating")).toBe(true);
-        })
+describe("POST api/ratings", () => {
+    test("should return 200 status code", () => {
+        return request(app).post('/api/ratings').expect(200)
+            .send({
+                "restaurant_id": 1,
+                "rating": 5,
+            })
     })
-});
+
+
+    test("returns error when body does not contain correct keys", () => {
+        return request(app).post('/api/ratings').expect(400)
+            .send({
+                1: "Hello",
+                "2": 1,
+            })
+            .then(({ body }) => {
+                console.log("Body is:", body)
+                expect(body).toEqual({
+                    "msg": "Your rating must contain the following keys: 'restaurant_id', 'rating'"
+                });
+            })
+    })
+
+
+    test("Returns rating back to user with successful submission", () => {
+        return request(app).post('/api/ratings')
+            .send({
+                "restaurant_id": 1,
+                "rating": 5,
+            })
+            .then(({ body }) => {
+                expect("rating" in body).toBe(true);
+                expect(Object.keys(body.rating)).toEqual(["rating_id", "restaurant_id", "rating"])
+            })
+    })
+})

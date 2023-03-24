@@ -1,5 +1,5 @@
 const express = require('express');
-const {getStatus, getRestaurants, postRestaurant, deleteRestaurant, patchRestaurant, getRestByAreaId} = require('./controller')
+const {getStatus, getRestaurants, postRestaurant, deleteRestaurant, patchRestaurant, getRestByAreaId, postRating} = require('./controller')
 
 const app = express();
 app.use(express.json());
@@ -11,6 +11,8 @@ app.get('/api', getStatus)
 app.get('/api/restaurants', getRestaurants)
 
 app.post('/api/restaurants', postRestaurant)
+
+app.post('/api/ratings', postRating)
 
 app.delete('/api/restaurants/:restaurant_id', deleteRestaurant)
 
@@ -30,3 +32,5 @@ app.use((err, request, response, next) => {
     response.status(err.status).send({msg: err.msg})
     next(err);
 })
+
+app.listen(9090);

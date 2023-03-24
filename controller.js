@@ -1,8 +1,8 @@
-const {fetchRestaurants, postNewRestaurant, removeRestaurant, updateAreaId, fetchRestByAreaId} = require('./model')
+const {fetchRestaurants, postNewRestaurant, removeRestaurant, updateAreaId, fetchRestByAreaId, addNewRating} = require('./model')
 
 
 module.exports.getStatus = (request, response) => {
-    response.status(200).send({message: 'all ok'})
+    response.status(200).send({message: "Hello and welcome to the restaurant reviews API! Feel free to browse restaurants, add or delete, or post reviews."})
 }
 
 
@@ -18,6 +18,18 @@ module.exports.postRestaurant = (request, response) => {
     postNewRestaurant(restaurant)
     .then(({ rows : [newRestaurant] }) => {
         response.status(201).send({restaurant: newRestaurant});
+    })
+}
+
+
+module.exports.postRating = (request, response) => {
+    const rating = request.body;
+    addNewRating(rating)
+    .then(([statusCode, responseObject]) => {
+        response.status(statusCode).send(responseObject);
+    })
+    .catch(([statusCode, responseObject]) => {
+        response.status(statusCode).send(responseObject);
     })
 }
 

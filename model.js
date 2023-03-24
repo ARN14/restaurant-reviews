@@ -18,6 +18,36 @@ module.exports.postNewRestaurant = (restaurant) => {
 }
 
 
+module.exports.addNewRating = (rating) => {
+  if ("rating" in rating && "restaurant_id" in rating) {
+
+    const ratingData = [
+      rating.restaurant_id,
+      rating.rating,
+    ]
+
+    return db.query('INSERT INTO ratings (restaurant_id, rating) VALUES ($1, $2) RETURNING *;', ratingData)
+      .then(({ rows: [row] }) => {
+        let status = 200
+        let responseObject = {
+          "rating": row
+        }
+
+        return [status, responseObject];
+      })
+  }
+  else {
+    let status = 400
+    let responseObject = {
+      "msg": "Your rating must contain the following keys: 'restaurant_id', 'rating'"
+    }
+
+    return Promise.reject([status, responseObject]);
+  }
+
+}
+
+
 module.exports.removeRestaurant = (restaurantId) => {
   const id = [restaurantId]
   return db.query('DELETE FROM restaurants WHERE restaurant_id = $1', id)
